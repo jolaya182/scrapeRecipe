@@ -4,7 +4,8 @@
   "description": "used for scrape and place a recipe",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon index.js"
   },
   "repository": {
     "type": "git",
@@ -15,5 +16,13 @@
   "bugs": {
     "url": "https://github.com/jolaya182/scrapeRecipe/issues"
   },
-  "homepage": "https://github.com/jolaya182/scrapeRecipe#readme"
+  "homepage": "https://github.com/jolaya182/scrapeRecipe#readme",
+  "dependencies": {
+    "fs": "0.0.1-security",
+    "puppeteer": "^1.1.1"
+  },
+  "devDependencies": {
+    "clearbit": "^1.3.3",
+    "nodemon": "^1.15.1"
+  }
 }
