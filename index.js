@@ -27,14 +27,15 @@ const browser = await puppeteer.launch({headless: false}); // default is true
     count = pages.length;
   }
   console.log(pages.length);
+  let companyNames = [];
   let data = [];
   let s = "";
-  let currDate = "2/27/2018"
+  let currDate = Date();
   let url = ""
   let jobTitle = "";
   let companyName = "";
   let skillsR = "";
-  let req = "";
+  // let req = "";
   let contactPerson = "";
   let contactTitle = "";
   let emailAddress = "";
@@ -42,15 +43,52 @@ const browser = await puppeteer.launch({headless: false}); // default is true
   let whatIFindInteresting = "";
   let product1 = "";
   let product2 = "";
-  let responded = "";
+  let respondedDoubleUp = "n/a";
   let subjectTitle = "";
-  let rejected = "";
-  let note = "";
+  let rejected = "n/a";
+  let note = "applied";
   for(let i = 0; i < pages.length; i += 1){
+  
+    // need to break the h1 into jobtitle and company
+    // jobTitle h1
+    // companyName h1
 
-    s = 
+      //YOU SHOULD GRAB ONLY THE FIRST ONE AND IF THERE IS NON RETRIEVED THEN RETURN "N/A"
+    // skillsR div.s-vgBottom2
+    // req -> its better to leave it out for now, too manny nested divs
+
+      //need to click on the apply button and then get the name of the person
+      //if it there is no name return and fill the rest of the fields n/a, if there is grab the name
+      //button is .c-button.c-button--blue.c-button--lg.js-interested-button
+      // contactPerson span.name.dm-selected.dm-test
+      //after getting the name, 
+      //
+    // contactTitle use clear bit to request this information
+    // emailAddress use clear bit to request this information
+    // socialFound use the recipe name to place it here
+
+    
+    // whatIFindInteresting leave blank for now
+    // product1 leave blank for now
+    // product2 leave blank for now
+    // respondedDoubleUp leave the way it is
+      //make sure the text has no, new lines, commas, \r, trim those things off
+    // subjectTitle  place the jobTitle and the string " position" together-> soap it
+    // rejected leave the way it is
+    // note leave the way it is
+  
+    //place all of theses variables in one array
+    //then push this into the data array to create the  
+
+    //also place the name of the company into another array.
+
+    s = "";
     //reset s = ""
   }
+  //create the round 4 csv document 
+
+  //create the companyNames csv document  with all of the companies names using the link to google
+  //
   
 })();
 
