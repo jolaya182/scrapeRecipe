@@ -72,7 +72,9 @@ console.log(textCsv);
   // open a new tab for each line that the textCsv has
   let firstTime = true;
 
-  //
+  //go through each website and open the page from the txtcsv file
+  // and authenticate if necessary
+
   for (let i = 0; i < textCsv.length; i += 1) {
     // const browser = await puppeteer.launch();
     const page = await browser.newPage();
@@ -82,7 +84,7 @@ console.log(textCsv);
       // console.log("data[]", data[0]);
       data = data[0].split("&ctt=");
       data[0] = data[0] + "\"";
-    }  //!==-1 ? data    : data[0].split("&ctt=")  ;
+    }  
     data[0] = data[0].replace(/['"]+/g, '');
 
     //need to authenticate with angellist
@@ -172,10 +174,10 @@ console.log(textCsv);
 
     //get url
     url = p.url();
-
+    //make sure you dont process these web pages
     if (url === "https://angel.co/login" || url === "https://angel.co/") break;
     console.log("url", url);
-
+    //get the web host name
     let aryUrlName;
     if (url.indexOf("angel") !== -1) aryUrlName = "angel";      // if( url.indexOf( "vettery" ) !== -1 ) aryUrlName = "vettery";
     else if (url.indexOf("stackoverflow") !== -1) aryUrlName = "stackoverflow";
