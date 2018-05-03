@@ -167,7 +167,8 @@ console.log(textCsv);
 
   let p = "";
 
-  //go through list of pages
+  //go through list of pages(applications) and  extract the company name, job application title, 
+  // jobs skills, and employee to contact if possible 
   // console.log("pages", pages);
   for (let i = 1; i < pages.length; i += 1) {
     p = pages[i];
@@ -185,6 +186,8 @@ console.log(textCsv);
     else if (url.indexOf("hired") !== -1) aryUrlName = "hired";
     else if (url.indexOf("glassdoor") !== -1) aryUrlName = "glassdoor";
     else if (url.indexOf("vettery") >= 0 || url.indexOf("linkedin") >= 0) {
+      // since we have not authenticated with vettery and linkedin we need to create an empty 
+      // job application row in the csv file
       whereIApplied = getNameFromUrl(url);
       // subjectTitle  place the jobTitle and the string " position" together-> soap it
       subjectTitle = "  position";
@@ -224,6 +227,7 @@ console.log(textCsv);
     // console.log("host:",aryUrlName[1], " title", recipe[ aryUrlName[1] ].title  );
     console.log("host:", aryUrlName);
     let title = { t: recipe[aryUrlName].title, s: recipe[aryUrlName].skillToScrape, n: recipe[aryUrlName].nameToScrape, c: recipe[aryUrlName].companyToScrap, site: aryUrlName };
+    //click on the apply now to gather the contact name information
     if (title.site == "angel") {
       let buttonDom = await p.evaluate(async () => {
         console.log("found angel");
@@ -247,6 +251,7 @@ console.log(textCsv);
     if (na != "") await p.waitForSelector(na).catch(err => console.log("error for name", err));
     if (co != "") await p.waitForSelector(co).catch(err => console.log("error for name", err));
 
+    //use a variable to hold the dom selectors available 
     let t = {
       t: title.t == "" ? "" : ti,  
       s: title.s == "" ? "" : sk,  
@@ -259,6 +264,8 @@ console.log(textCsv);
     let foundSkill = "";
     let foundName = "";
     let foundCompany = "";
+
+    //each web host is processed differently according to the web host's selectors available 
     if (t.site === "angel") {
       console.log("t", t);
       foundTitle = await p.evaluate((ti) => { let str = document.querySelector(ti).textContent; console.log("ti", ti, "str", str); return str; }, t.t);
@@ -285,16 +292,13 @@ console.log(textCsv);
         for (let i = 1; i < g.length - 1; i += 1) {
           if (g[i].nodeType == 1) {
             str += g[i].innerHTML.replace(/^\s+|\s+$/g, '') + " ";
-            //str += g[i].childNodes[1].innerHTML.replace(/^\s+|\s+$/g, '') + " ";
+            
           }
         }
-
         return str;
       }, t.s);
       foundName = t.n;
       foundCompany = await p.evaluate((co) => document.querySelector(co).textContent, t.c);
-
-
     }
     else if (t.site === "builtinnyc") {
       foundTitle = await p.evaluate((ti) => document.querySelector(ti).textContent, t.t);
@@ -335,7 +339,8 @@ console.log(textCsv);
     // titleSkillName = {t:"Software Engineer - Front End at Iterable", s: "$100K–$140K0.04%–0.05%'", n:"Allison Cougan", site : "https://angel.co/iterable/jobs/12261-software-engineer-front-end" };
     let titleSkillName = { t: foundTitle, s: foundSkill, n: foundName, c: foundCompany, site: t.site };
     console.log("scrapedItems", titleSkillName);//scrapedItems
-
+    
+    //make sure no text have any commas in their text. if so this will produce a wrong round application csv file
     jobTitle = titleSkillName.t.replace(",", " ").replace(";", " ") || "n/a";; //make changes according to receipe
     companyName = titleSkillName.c.replace(",", " ").replace(";", " ") || "n/a";
     skillsR = titleSkillName.s.replace(",", " ").replace(";", " ") || "n/a";
@@ -346,7 +351,7 @@ console.log(textCsv);
 
     let domainFound = await clearbit.NameToDomain.find({ name: companyName, stream: true }) //beginging of comment
       .then(async function (response) {
-        console.log("nameToDomain:", response.domain);
+        // console.log("nameToDomain:", response.domain);
         console.log('Name: ', response.name);
 
         let contcts = await clearbit.Prospector.search({ domain: response.domain, limit: 1 })
@@ -362,15 +367,16 @@ console.log(textCsv);
         if (contactPerson != "") {
           let emailTitle = await clearbit.Prospector.search({ domain: response.domain, name: contactPerson })// , name:contactPerson  ({domain: response.domain , name:contactPerson}
             .then(function (response) {
-              console.log("response from prospector:", response);
+              // console.log("response from prospector:", response);
+              //clear bit cannot received and empty string so we need to create an array with dummy data
               if (response.length < 1) { response = [{ name: { fullName: "no name found" }, title: "no title found", email: "no email found" }]; }
               // console.log('email response: ',  response[0].email, " title response" , response[0].title );
               whereIApplied = getNameFromUrl(url);
               // subjectTitle  place the jobTitle and the string " position" together-> soap it
               subjectTitle = jobTitle + " position";
               console.log("textCsv[i]", textCsv)
+              //if the web link contains any commas then replace them with : since we cannot have commas in the text
               let d = textCsv[i - 1].split(",").join(";");
-
               putTogetherData(
                 {
                   currDate: Date(),
@@ -548,7 +554,7 @@ function getNameFromUrl(s) {
 
 // fs.close();
 
-
+// puppeteer code that works as way to check how the functions work
 // (async () => {
 //   const browser = await puppeteer.launch({headless: false}); // default is true
 //   // const browser = await puppeteer.launch();
