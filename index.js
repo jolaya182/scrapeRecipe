@@ -13,13 +13,13 @@ let textCsv = fs.readFileSync("C:/gitHubRepo/scrapeRecipe/listOFUrl.csv", 'utf8'
 
 //take away the last line
 textCsv.splice(textCsv.length - 1);
-console.log(textCsv);
+// console.log("textCsv:\n",textCsv);
 
 
 (async () => {
   //can either set the chromium browser to open or run without the chromium browser
-  // const browser = await puppeteer.launch({headless: false}); // default is true
-  const browser = await puppeteer.launch();
+  const browser = await puppeteer.launch({headless: false}); // default is true
+  // const browser = await puppeteer.launch();
   //list of selectors for each websites
   let recipe = {
     "angel": {
@@ -44,7 +44,7 @@ console.log(textCsv);
       title: "html > body > div > main > div > div > div > div > div > div > div > div > div > article > div > h1 > span",
       skillToScrape: "",
       nameToScrape: "",
-      companyToScrap: "",
+      companyToScrap: "html > body > div > main > div > div > div > div > div > div > div > div > div > article > div > div:nth-of-type(2) > div > div > a",
     },
     "linkedin": {
       title: "html > body > div:nth-of-type(6) > div:nth-of-type(3) > div:nth-of-type(3) div > div > div > div > div > div > div > div:nth-of-type(3) > h1 ",//div#ember990 > div > div:nth-of-type(3) > h1
@@ -98,7 +98,7 @@ console.log(textCsv);
       //  console.log("us",us ,  "ps", ps, "logb", logb);
       let u = "javi182pro@gmail.com";
       let p = "marieo23";
-
+      console.log("logging on to angellist");
       await newPage1.waitForSelector(us).catch(err => console.log("wait on us err", err));
       await newPage1.waitForSelector(ps).catch(err => console.log("wait on ps err", err));
       await newPage1.waitForSelector(logb).catch(err => console.log("wait on logb err", err));
@@ -110,10 +110,10 @@ console.log(textCsv);
       await newPage1.click(logb).catch(err => console.log("wait on click logb err", err));;
       await newPage1.waitForNavigation({ waitUntil: 'networkidle2' }).catch(err => console.log("error on wait for navigation", err))
       console.log("U", u, "P", p);
-
+      await newPage1.close();
     }
     // if it is vettery need to then authenticate
-    console.log("data", data[0]);
+    console.log(i, " data", data[0]);
     // if(data[0].indexOf("linkedin")){  //if it is linked then authenticate
     //   const u = "";
     //   const p = "";
@@ -169,15 +169,16 @@ console.log(textCsv);
 
   //go through list of pages(applications) and  extract the company name, job application title, 
   // jobs skills, and employee to contact if possible 
-  // console.log("pages", pages);
-  for (let i = 1; i < pages.length; i += 1) {
+  console.log("pages:", pages);
+  let pagesLength = pages.length;
+  for (let i = 1; i < pagesLength; i += 1) {
     p = pages[i];
 
     //get url
     url = p.url();
+    console.log(i, " url", url);
     //make sure you dont process these web pages
-    if (url === "https://angel.co/login" || url === "https://angel.co/") break;
-    console.log("url", url);
+    if (url === "https://angel.co/login" || url === "https://angel.co/") continue;
     //get the web host name
     let aryUrlName;
     if (url.indexOf("angel") !== -1) aryUrlName = "angel";      // if( url.indexOf( "vettery" ) !== -1 ) aryUrlName = "vettery";
@@ -191,7 +192,7 @@ console.log(textCsv);
       whereIApplied = getNameFromUrl(url);
       // subjectTitle  place the jobTitle and the string " position" together-> soap it
       subjectTitle = "  position";
-      console.log("textCsv[i] not found", textCsv[i])
+      console.log("textCsv[i]!! not found", textCsv[i])
       let d = textCsv[i - 1].split(",").join(";");
       putTogetherData(
         {
@@ -249,7 +250,7 @@ console.log(textCsv);
     if (ti != "") await p.waitForSelector(ti).catch(err => console.log("error for title", err));
     if (sk != "") await p.waitForSelector(sk).catch(err => console.log("error for skill", err));
     if (na != "") await p.waitForSelector(na).catch(err => console.log("error for name", err));
-    if (co != "") await p.waitForSelector(co).catch(err => console.log("error for name", err));
+    if (co != "") await p.waitForSelector(co).catch(err => console.log("error for company", err));
 
     //use a variable to hold the dom selectors available 
     let t = {
@@ -269,7 +270,7 @@ console.log(textCsv);
     if (t.site === "angel") {
       console.log("t", t);
       foundTitle = await p.evaluate((ti) => { let str = document.querySelector(ti).textContent; console.log("ti", ti, "str", str); return str; }, t.t);
-      foundSkill = await p.evaluate((sk) => { let str = document.querySelector(sk).textContent; console.log("sk", sk, "str", str); str.replace("\n", " "); return str; }, t.s);
+      foundSkill = await p.evaluate((sk) => { let str = document.querySelector(sk).textContent.replace(/(\r\n\t|\n|\r\t)/gm, ''); str = str.replace(","," "); console.log("sk", sk, "str", str); return str; }, t.s);
       foundName = await p.evaluate((na) => { let str = document.querySelector(na).textContent; console.log("na", na, "str", str); return str; }, t.n);
       let spltTitleCompany = foundTitle.split("at"); //make changes according to receipe
       foundTitle = spltTitleCompany[0];
@@ -285,7 +286,7 @@ console.log(textCsv);
     }
     else if (t.site === "stackoverflow") {
       console.log("stackoverflow t", t);
-      foundTitle = await p.evaluate((ti) => document.querySelector(ti).textContent, t.t);
+      foundTitle = await p.evaluate( (ti)=>{let str = document.querySelector(ti).textContent.replace(/(\r\n\t|\n|\r\t)/gm, ''); str = str.replace(","," "); console.log("ti", ti, "str", str); return str; }, t.t);
       foundSkill = await p.evaluate((sk) => {
         let str = "";
         let g = document.querySelector(sk).childNodes;
@@ -301,18 +302,17 @@ console.log(textCsv);
       foundCompany = await p.evaluate((co) => document.querySelector(co).textContent, t.c);
     }
     else if (t.site === "builtinnyc") {
-      foundTitle = await p.evaluate((ti) => document.querySelector(ti).textContent, t.t);
+      console.log("builtinnyc t", t);
+      foundTitle = await p.evaluate( (ti)=>{let str = document.querySelector(ti).textContent.replace(/(\r\n\t|\n|\r\t)/gm, ''); str = str.replace(","," "); console.log("ti", ti, "str", str); return str; }, t.t); 
       foundSkill = t.s;
       foundName = t.n;
-      foundCompany = t.c;
-      let spltTitleCompany = foundTitle.split(", "); //make changes according to receipe
-      foundTitle = spltTitleCompany[0];
-      foundCompany = spltTitleCompany[1];
+      foundCompany = await p.evaluate( (co)=>{let str = document.querySelector(co).textContent.replace(/(\r\n\t|\n|\r\t)/gm, ''); str = str.replace(","," "); console.log("to", co, "str", str); return str; }, t.c); 
     }
     else if (t.site === "linkedin") {
       console.log("t", t);
     }
     else if (t.site === "hired") {
+      console.log("hired t", t);
       foundTitle = t.t;
       foundSkill = await p.evaluate((sk) => {
         let str = "";
@@ -374,7 +374,7 @@ console.log(textCsv);
               whereIApplied = getNameFromUrl(url);
               // subjectTitle  place the jobTitle and the string " position" together-> soap it
               subjectTitle = jobTitle + " position";
-              console.log("textCsv[i]", textCsv)
+              console.log("textCsv[i - 1]__", textCsv[i - 1])
               //if the web link contains any commas then replace them with : since we cannot have commas in the text
               let d = textCsv[i - 1].split(",").join(";");
               putTogetherData(
@@ -415,7 +415,7 @@ console.log(textCsv);
           whereIApplied = getNameFromUrl(url);
           // subjectTitle  place the jobTitle and the string " position" together-> soap it
           subjectTitle = jobTitle + " position";
-          console.log("textCsv[i]", textCsv);
+          console.log("textCsv[i]>>", textCsv);
           let d = textCsv[i - 1].split(",").join(";");
           putTogetherData(
             {
@@ -452,7 +452,7 @@ console.log(textCsv);
         whereIApplied = getNameFromUrl(url);
         // subjectTitle  place the jobTitle and the string " position" together-> soap it
         subjectTitle = jobTitle + " position";
-        console.log("textCsv[i]", textCsv)
+        console.log("textCsv[i]--", textCsv)
         let d = textCsv[i - 1].split(",").join(";");
         putTogetherData(
           {
@@ -484,13 +484,13 @@ console.log(textCsv);
 
       });
     // await browser.close();
+  console.log("i", i, " pages length is ", pages.length)
 
   } //end of for loop
   //after looping through all the pages
   //create the round 4 csv document 
   //create the companyNames csv document  with all of the companies names using the link to google
   let att = "date,	link, title,	company,	skills,	requirements,	contactPerson,	contactInfo,	contactsTitle,	email,	socialMediaFound,	workTogetherTO-interestingThingOFCompanythatContinuesToBeAtTheForFrontOfTheirSpace,	fromThe-Product1,	toThe-Product2,	whereIApplied,	respondedDoubleUP,	subjectTitle,	rejected,	note , reachContactPerson, reachContactTitle, reachEmailAddress ,reachSocialFound,    \n";
-
   createcsvDocument(data, att, 'roundOfApplicationData.csv');
   let atr = "companyName, name, contactTitle, contactEmail \n"
   createcsvDocument(contacts, atr, 'listOfPotentialContacts.csv');  //last part of comment
@@ -514,11 +514,7 @@ function createcsvDocument(data, attrs, fileName) {
       console.log("savedFile with no problems");
     }
   });
-  // let hiddenElement = document.createElement('a');
-  // hiddenElement.href = 'data:text/csv;charset=utf-8,' + encodeURI(csv);
-  // hiddenElement.target = '_blank';
-  // hiddenElement.download = 'people.csv';
-  // hiddenElement.click();
+
 }
 
 function sendContacts(contactsObj, contacts) {
@@ -554,94 +550,3 @@ function getNameFromUrl(s) {
 
 // fs.close();
 
-// puppeteer code that works as way to check how the functions work
-// (async () => {
-//   const browser = await puppeteer.launch({headless: false}); // default is true
-//   // const browser = await puppeteer.launch();
-//   const page = await browser.newPage();
-//   await page.goto(line);
-
-//   // Get the "viewport" of the page, as reported by the page.
-//   const dimensions = await page.evaluate(() => {
-//     return {
-//       width: document.documentElement.clientWidth,
-//       height: document.documentElement.clientHeight,
-//       deviceScaleFactor: window.devicePixelRatio
-//     };
-//   });
-
-//   console.log('Dimensions:', dimensions);
-
-//   await browser.close();
-// })();
-
-// (async () => {
-//   const browser = await puppeteer.launch({headless: false}); // default is true
-//     // const browser = await puppeteer.launch();
-//     const page = await browser.newPage();
-//     await page.goto('https://example.com');
-//     await page.screenshot({path: 'example.png'});
-
-//     await browser.close();
-//   })();
-
-
-//   (async () => {
-//     const browser = await puppeteer.launch({headless: false}); // default is true
-//   // const browser = await puppeteer.launch();
-//   const page = await browser.newPage();
-//   await page.goto('https://news.ycombinator.com', {waitUntil: 'networkidle2'});
-//   await page.pdf({path: 'hn.pdf', format: 'A4'});
-
-//   await browser.close();
-// })();
-
-//what I need 
-
-// clearbit.Prospector.search({domain: 'www.kean.edu' ,name:"katrina boseman"})
-//   .then(function (response) {
-//     var person  = response.person;
-//     var company = response.company;
-
-//     console.log('response: ',  response[0].email);
-//     // console.log('Name: ',  person, " company: ", company);
-//   })
-//   .catch(clearbit.Enrichment.QueuedError, function (err) {
-//     // Lookup is queued
-//     console.log(err);
-//   })
-//   .catch(function (err) {
-//     console.error(err);
-//   });
-
-// var Company = clearbit.Company;
-
-// Company.find({domain: 'www.kean.edu', name:"katrina", last })
-//   .then(function (company) {
-//     console.log("response:",company);
-//     // console.log('Name: ', company.name);
-//   })
-//   .catch(Company.QueuedError, function (err) {
-//     // Company lookup queued - try again later
-//   })
-//   .catch(Company.NotFoundError, function (err) {
-//     // Company could not be found
-//     console.log(err);
-//   })
-//   .catch(function (err) {
-//     console.error(err);
-//   });
-
-// clearbit.NameToDomain.find({ name:"kean university", stream: true})
-//   .then(function (response) {
-//     var person  = response.person;
-//     var company = response.company;
-
-//     console.log('Name: ', response);
-//     // console.log('Name: ', person && person.name.fullName);
-
-//   })
-//   .catch(function (err) {
-//     console.error(err);
-//   });
-// clearbit.Discovery
