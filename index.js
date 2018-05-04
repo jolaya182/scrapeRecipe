@@ -18,8 +18,8 @@ textCsv.splice(textCsv.length - 1);
 
 (async () => {
   //can either set the chromium browser to open or run without the chromium browser
-  const browser = await puppeteer.launch({headless: false}); // default is true
-  // const browser = await puppeteer.launch();
+  // const browser = await puppeteer.launch({headless: false}); // default is true
+  const browser = await puppeteer.launch();
   //list of selectors for each websites
   let recipe = {
     "angel": {
@@ -345,7 +345,7 @@ textCsv.splice(textCsv.length - 1);
     companyName = titleSkillName.c.replace(",", " ").replace(";", " ") || "n/a";
     skillsR = titleSkillName.s.replace(",", " ").replace(";", " ") || "n/a";
     // the skill could be scraped and be empty, in that case return n/a
-    if (titleSkillName.n == "") contactPerson = "n/a";
+    if (titleSkillName.n == "") contactPerson = "_";
     else contactPerson = titleSkillName.n;
     console.log(">>>>  jobTitle", jobTitle, "companyName", companyName, "skillsR", skillsR);
 
