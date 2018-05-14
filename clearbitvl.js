@@ -79,3 +79,9 @@ function createcsvDocument(data, attrs, fileName) {
     }
   });
 }
+
+function soapText(str){
+  str = str.trim();
+  str = str.replace(","," ");
+  return str.replace(/(\r\n\t|\n|\r\t)/gm, ''); 
+}
