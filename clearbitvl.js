@@ -3,7 +3,7 @@
 //next advancement is to place the cover letter on the apply now page and submit on angel list 
 let fs = require("fs");
 const readline = require('readline');
-let clearbit = require('clearbit')("sk_586292a4b3c1ed19cbb759781e905644");
+let clearbit = require('clearbit')("sk_faeb3ccb14092dc6be7dd34239f644c5");
 const puppeteer = require('puppeteer');
 let textCsv = fs.readFileSync("C:/gitHubRepo/scrapeRecipe/roundOfApplicationData.csv", 'utf8').split("\r\n");
 console.log(textCsv.length);
