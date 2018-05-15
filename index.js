@@ -7,7 +7,7 @@
 ///should work for an angellist, hired, linkedin, buildnyc, stackoverflow,  vettery recipe 
 let fs = require("fs");
 const readline = require('readline');
-let clearbit = require('clearbit')("sk_faeb3ccb14092dc6be7dd34239f644c5");
+let clearbit = require('clearbit')("");
 const puppeteer = require('puppeteer');
 let textCsv = fs.readFileSync("C:/gitHubRepo/scrapeRecipe/listOFUrl.csv", 'utf8').split("\r\n");
 let timeElapsed = new Date(); 
